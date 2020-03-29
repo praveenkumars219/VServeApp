@@ -1,10 +1,6 @@
 name: Jekyll site CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push]
 
 jobs:
   build-and-deploy:
@@ -25,5 +21,5 @@ jobs:
             repo-token: ${{ secrets.GITHUB_TOKEN }}
             BASE_BRANCH: master
             BRANCH: vserve_pages
-            FOLDER: dist 
+            FOLDER: dist
             CLEAN: true
