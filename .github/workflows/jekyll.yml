@@ -22,7 +22,7 @@ jobs:
     - name: Deploy to Github Pages
       uses: actions/labeler@v2
       with:
-            ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            repo-token: ${{ secrets.GITHUB_TOKEN }}
             BASE_BRANCH: master
             BRANCH: master
             FOLDER: build/VServe/dist 
