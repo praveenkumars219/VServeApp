@@ -1,2 +1,2 @@
 # CamClicqr
-App to connect Camera Clickers
+Launching the VServer
