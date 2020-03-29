@@ -24,6 +24,6 @@ jobs:
       with:
             repo-token: ${{ secrets.GITHUB_TOKEN }}
             BASE_BRANCH: master
-            BRANCH: master
-            FOLDER: build/VServe/dist 
+            BRANCH: vserve_pages
+            FOLDER: dist 
             CLEAN: true
