@@ -1,2 +1,1 @@
-# CamClicqr
-Launching the VServer to main
+Welcome to VServe
