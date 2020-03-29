@@ -1,0 +1,60 @@
+﻿@page "/login"
+
+@using vserver_proto.Data
+@using vserver_proto.Repositories.Authentication
+@inject LoginService loginService
+@inject AuthenticationStateRepo _authenticationStateRepo
+@inject NavigationManager NavigationManager
+
+
+<div class="indcarousel-login">
+    <MatContentWrapper>
+        <MatCard>
+            <MatCardContent Class="text-center m-1">
+                <MatHeadline5>Login</MatHeadline5>
+                <MatBody1>
+                    <EditForm Model="@loginM" OnValidSubmit="@ValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="form-group px-4">
+                            <InputText type="email" id="userid" @bind-Value="loginM.UserId" />
+                        </div>
+                        <div class="form-group px-4">
+                            <InputText type="password" id="pwd" @bind-Value="loginM.Password" />
+                        </div>
+                        <button class="btn btn-lg btn-dark" type="submit">Log in</button>
+                    </EditForm>
+                </MatBody1>
+                <MatCardActionButtons>
+                    <MatButton @onclick="@Register">Register</MatButton>
+                    <MatButton>Forgot Password?</MatButton>
+                </MatCardActionButtons>
+            </MatCardContent>
+        </MatCard>
+    </MatContentWrapper>
+</div>
+
+
+
+@code{
+    private LoginModel loginM = new LoginModel();
+    string token;
+
+    protected override void OnInitialized()
+    {
+    }
+
+    private async Task ValidSubmit()
+    {
+        loginM.BaseUrl = NavigationManager.BaseUri;
+        var authLink = await loginService.Login(loginM).ConfigureAwait(false);
+        _authenticationStateRepo.Authenticate();
+        _authenticationStateRepo.RefreshUserAsync(authLink);
+        NavigationManager.NavigateTo("/", true);
+    }
+
+    private void Register()
+    {
+        NavigationManager.NavigateTo("/register", true);
+    }
+}

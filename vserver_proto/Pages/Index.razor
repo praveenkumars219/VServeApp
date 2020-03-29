@@ -1,0 +1,181 @@
+﻿@page "/"
+
+@using Data;
+@using vserver_proto.Pages.SignOn;
+@inject DataService StaticData;
+
+<div class="indcarousel">
+    <div class="indcarousel-col">
+        <div class="indcarousel-col-txt-lt">
+            <span>
+                If you've right skills to match our requirement, you are one step away from grabbing it.
+            </span>
+            <MatButton>Search</MatButton>
+        </div>
+    </div>
+    <div class="indcarousel-col">
+        <div class="indcarousel-col-txt-rt">
+            <span>
+                If you want some work to be done ASAP.We are here to find a right technician for you!
+            </span>
+            <MatButton>Post</MatButton>
+        </div>
+    </div>
+</div>
+
+
+<div class="maingrid">
+    <div Class="maingrid-col">
+        <MatCard Class="maingrid-card">
+            <MatCardContent>
+                <div class="demo-mat-card-content">
+                    <MatHeadline5 Class="demo-mat-card-clean-margin">
+                        Find your Job!
+                    </MatHeadline5>
+                    <MatBody1>
+                        <EditForm Model="@SearchCriteria" class="d-flex mat-layout-grid-cell-align-middle form-bg container-alignment">
+                            <div class="row vw-100">
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 clearfix">
+                                    <h6 class="text-white">Search By Keywords...</h6>
+                                    <div class="bg-white top-margin">
+                                        <BlazoredTypeahead SearchMethod="SearchWorkItem" @bind-Value="@SelectedWorkType">
+                                            <SelectedTemplate Context="localContext">
+                                                @localContext.Name
+                                            </SelectedTemplate>
+                                            <ResultTemplate Context="localContext">
+                                                @localContext.Name
+                                            </ResultTemplate>
+                                        </BlazoredTypeahead>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 clearfix">
+                                    <h6 class="text-white">Location</h6>
+                                    <div class="bg-white top-margin">
+                                        <BlazoredTypeahead SearchMethod="SearchStates" @bind-Value="@SelectedCity">
+                                            <SelectedTemplate Context="localContext">
+                                                @localContext.City
+                                            </SelectedTemplate>
+                                            <ResultTemplate Context="localContext">
+                                                @localContext.City, @localContext.District,  @localContext.State
+                                            </ResultTemplate>
+                                        </BlazoredTypeahead>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 clearfix">
+                                    <div class="d-flex text-white top-margin">
+                                        <div class="d-flex-inline">Experience:</div>
+                                        <MatSlider Class="text-white d-flex-inline" ValueMin="0" ValueMax="30" Step="3" EnableStep="true" Discrete="true" @bind-Value="@ValExp"></MatSlider>
+                                        <label class="d-flex-inline text-white">&le;@ValExp</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 clearfix">
+                                    <div class="d-flex text-white top-margin">
+                                        <div class="d-flex-inline">Price<span class="priceIcon">(Rs)</span>/hour</div>
+                                        <MatSlider Class="text-white d-flex-inline" ValueMin="0" ValueMax="5000" Step="50" EnableStep="true" Discrete="true" @bind-Value="@ValPrice"></MatSlider>
+                                        <label class="d-flex-inline text-white">&le;@ValPrice</label>
+                                    </div>
+                                </div>
+                                <div class="col-12 text-center">
+                                    <MatButton class="bg-white btn btn-lg" type="submit">Search</MatButton>
+                                </div>                              
+                            </div>
+                        </EditForm>
+                        <HomeSearchTable></HomeSearchTable>
+                    </MatBody1>
+                    @*<MatCardActions>
+                        <MatCardActionButtons>
+                            <MatButton>Search</MatButton>
+                        </MatCardActionButtons>
+                    </MatCardActions>*@
+                </div>
+            </MatCardContent>
+        </MatCard>
+    </div>
+</div>
+
+
+
+
+@code{
+    private SearchEntity SearchCriteria = new SearchEntity();
+    List<string> SerachList = new List<string>();
+    IEnumerable<States> States;
+    private WorkType SelectedWorkType;
+    private CityState SelectedCity;
+    public decimal ValExp
+    {
+        get => _valExp;
+        set
+        {
+            _valExp = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private decimal _valExp = 0;
+
+     public decimal ValPrice
+    {
+        get => _valPrice;
+        set
+        {
+            _valPrice = value;
+            this.StateHasChanged();
+        }
+    }
+
+    private decimal _valPrice = 0;
+
+    void ChangeInSearch(ChangeEventArgs keyboardEventArgs)
+    {
+        SerachList.Add(keyboardEventArgs.Value.ToString());
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        States = await StaticData.GetStates().ConfigureAwait(false);
+    }
+
+    private async Task<IEnumerable<WorkType>> SearchWorkItem(string searchText)
+    {
+        return await Task.FromResult(new List<WorkType>
+{
+            new WorkType
+            {
+                Code ="J0001",
+                Name="Software Engineer"
+            },
+            new WorkType
+            {
+                Code="J0002",
+                Name="Electrician"
+            },
+            new WorkType
+            {
+                Code="J0003",
+                Name = "Mechanical"
+            }
+        }.Where(x => x.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList());
+    }
+
+    private async Task<IEnumerable<CityState>> SearchStates(string searchText)
+    {
+        IList<CityState> cities = new List<CityState>();
+        foreach (var states in States)
+        {
+            states.districts.ForEach(x =>
+            {
+                x.Cities.ForEach(y =>
+                {
+                    if (y.City.Contains(searchText))
+                    {
+                        cities.Add(new CityState { City = y.City, District = x.District, State = states.State });
+                    }
+                });
+            });
+        }
+        return await Task.FromResult(cities);
+    }
+}
+
+

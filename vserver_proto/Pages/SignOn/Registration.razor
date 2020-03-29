@@ -1,0 +1,103 @@
+﻿@page "/register"
+
+@using vserver_proto.Data
+@inject RegistrationService registerService
+@inject NavigationManager navManager
+
+<MatSnackbar @bind-IsOpen="@errorOpened">
+    <MatSnackbarContent> @ErrorMessage </MatSnackbarContent>
+    <MatSnackbarActions>
+        <MatButton Raised="true">Retry</MatButton>
+    </MatSnackbarActions>
+</MatSnackbar>
+
+<div class="indcarousel-login">
+    <div class="text-black-50 text-center indcarousel-col-register ">
+        <h4>Register</h4>
+        <h5>Already Have Account?<MatButton Raised="true" @onclick="@LoginClick">Login</MatButton></h5>
+    </div>
+    <div class="purple-square-container text-center indcarousel-col-register">
+        <EditForm Model="@UseRequest" class="border-primary px-4" OnValidSubmit="@RegisterAccount">
+            <DataAnnotationsValidator />
+            <ValidationSummary>
+            </ValidationSummary>
+            <div class="form-group row mb-1">
+                <label class="col-sm-3 col-form-label" for="NewEmail">Email</label>
+
+                <div class="col-sm-9">
+                    <InputText type="email" Class="form-control" @bind-Value="@UseRequest.Email" />
+                    <ValidationMessage For="@(() => UseRequest.Email)" />
+                </div>
+
+            </div>
+            <div class="form-group row mb-1">
+                <label class="col-sm-3 col-form-label" for="NewName">Name</label>
+
+                <div class="col-sm-9">
+                    <InputText Class="form-control" @bind-Value="@UseRequest.DisplayName" />
+                    <ValidationMessage For="@(() => UseRequest.DisplayName)" />
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label class="col-sm-3 col-form-label" for="NewPassword">Password</label>
+
+                <div class="col-sm-9">
+                    <InputText type="password" Class="form-control" @bind-Value="@UseRequest.Password" />
+                    <ValidationMessage For="@(() => UseRequest.Password)" />
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label class="col-sm-3 col-form-label" for="NewConfirmPassword">Confirm</label>
+
+                <div class="col-sm-9">
+                    <InputText type="password" Class="form-control" @bind-Value="@UseRequest.ConfirmPassword" />
+                    <ValidationMessage For="@(() => UseRequest.ConfirmPassword)" />
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label class="col-sm-3 col-form-label" for="NewPassword">Phone#</label>
+                <div class="col-sm-9">
+                    <InputText type="phone" Class="form-control" @bind-Value="@UseRequest.PhoneNumber" />
+                    <ValidationMessage For="@(() => UseRequest.PhoneNumber)" />
+                </div>
+            </div>
+            <div class="form-group text-center mb-0">
+                <button type="submit" ref="createButton" id="BtnRegister" class="btn btn-primary">Register</button>
+            </div>
+        </EditForm>
+    </div>
+
+</div>
+
+
+@code {
+    public UserRequest UseRequest { get; set; }
+    private bool errorOpened = false;
+    public string ConfirmPassword { get; set; }
+    public string ErrorMessage { get; set; }
+
+    protected override void OnInitialized()
+    {
+        UseRequest = new UserRequest();
+    }
+
+    private async Task RegisterAccount()
+    {
+        try
+        {
+            await registerService.Register(UseRequest).ConfigureAwait(false);
+            navManager.NavigateTo("/login", true);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            errorOpened = true;
+        }
+    }
+
+    private void LoginClick()
+    {
+        navManager.NavigateTo("login", true);
+    }
+
+}
